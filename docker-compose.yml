@@ -1,0 +1,69 @@
+services:
+  pgDB:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: practica_user
+      POSTGRES_PASSWORD: practica_pass
+      POSTGRES_DB: practica_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+  mongodb:
+    image: mongo:6
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app-network
+  express:
+    build:
+      context: ./express
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=development
+      - PG_HOST=pgDB
+      - PG_PORT=5432
+      - PG_USER=practica_user
+      - PG_PASSWORD=practica_pass
+      - PG_DATABASE=practica_db
+      - MONGO_URI=mongodb://mongodb:27017/practica_db
+      - JWT_SECRET=supersecretjwt
+      - PORT=5000
+    volumes:
+      - ./express:/app
+      - /app/node_modules
+    depends_on:
+      - pgDB
+      - mongodb
+    networks:
+      - app-network
+
+  vue:
+    build:
+      context: ./form_vue
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - NODE_OPTIONS=--openssl-legacy-provider
+    # no volumes so the container uses the files and node_modules baked into the image
+    depends_on:
+      - express
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db_data:
+  mongo_data:
