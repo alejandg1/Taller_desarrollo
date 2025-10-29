@@ -34,7 +34,7 @@ services:
       - PG_PASSWORD=practica_pass
       - PG_DATABASE=practica_db
       - MONGO_URI=mongodb://mongodb:27017/practica_db
-      - JWT_SECRET=supersecretjwt
+      - JWT_SECRET=jwtsecret
       - PORT=5000
     volumes:
       - ./express:/app
