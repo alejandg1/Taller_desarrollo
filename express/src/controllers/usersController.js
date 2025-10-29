@@ -35,7 +35,6 @@ const update = async (req, res) => {
   try {
     const repo = getRepository(req.params.db);
     const data = { ...req.body };
-    // Only update password if a new one is provided
     if (!data.password || data.password.trim().length === 0) {
       delete data.password;
     }
